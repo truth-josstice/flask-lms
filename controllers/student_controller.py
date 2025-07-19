@@ -14,12 +14,12 @@ def get_students():
     students_list = db.session.scalars(stmt) # Python object
     data = students_schema.dump(students_list) # JavaScript JSON object
 
+    # For understanding Python objects and JSON objects
+    # students_list_a = list(db.session.scalars(stmt))
+    # print([student.name for student in students_list_a])
+    # student_json = [student["name"] for student in data]
+    # print(student_json)
     if data:
-        # student_json = [student["name"] for student in data]
-        # print(student_json)
-
-        # student_python_obj = [student.name for student in students_list]
-        # print(student_python_obj)
         return jsonify(data)
     else:
         return {"message": "No student records found."}, 404
