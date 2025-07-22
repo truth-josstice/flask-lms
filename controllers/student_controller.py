@@ -92,3 +92,26 @@ def delete_student(student_id):
     else:
         # return an acknowledgement message
         return {"message": f"Student with id '{student_id}' does not exist"}, 404
+    
+# UPDATE /students/id
+@student_bp.route("/<int:student_id>", methods=["PUT", "PATCH"])
+def update_student(student_id):
+    # Get the student with id
+    stmt = db.select(Student).where(Student.id == student_id)
+    student = db.session.scalar(stmt)
+    # if exists
+    if student:
+        # get the data to be updated
+        body_data = request.get_json()
+        # make changes
+        student.name = body_data.get("name") or student.name
+        student.email = body_data.get("email") or student.email
+        student.address = body_data.get("address") or student.address
+        # commit
+        db.session.commit()
+        # return
+        return jsonify(student_schema.dump(student))
+    # else
+    else:
+        # return with an error message
+        return {"message": f"Student with id {student_id} does not exist."}, 404
