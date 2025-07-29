@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from dotenv import load_dotenv
 
 from controllers.cli_controller import db_commands
 from controllers.student_controller import student_bp
@@ -8,6 +9,7 @@ from controllers.teacher_controller import teacher_bp
 from controllers.course_controller import course_bp
 from init import db
 
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)
