@@ -1,10 +1,13 @@
+import os
+
 from flask import Flask
+
 from controllers.cli_controller import db_commands
 from controllers.student_controller import student_bp
 from controllers.teacher_controller import teacher_bp
-
+from controllers.course_controller import course_bp
 from init import db
-import os
+
 
 def create_app():
     app = Flask(__name__)
@@ -18,6 +21,7 @@ def create_app():
     app.register_blueprint(db_commands)
     app.register_blueprint(student_bp)
     app.register_blueprint(teacher_bp)
+    app.register_blueprint(course_bp)
 
     return app
 
