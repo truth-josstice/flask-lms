@@ -3,7 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from psycopg2 import errorcodes
 
 from init import db
-from models.teacher import Teacher, teachers_schema, teacher_schema
+from models.teacher import Teacher
+from schemas.schemas import teachers_schema, teacher_schema
 
 teacher_bp = Blueprint("teacher", __name__, url_prefix="/teachers")
 

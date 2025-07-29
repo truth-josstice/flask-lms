@@ -13,6 +13,8 @@ def create_app():
 
     db.init_app(app)
 
+    app.json.sort_keys = False # To keep the order of keys in JSON response
+
     app.register_blueprint(db_commands)
     app.register_blueprint(student_bp)
     app.register_blueprint(teacher_bp)
