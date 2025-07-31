@@ -14,8 +14,10 @@ class StudentSchema(SQLAlchemyAutoSchema):
         model = Student
         load_instance = True
         include_relationships = True
+        ordered=True
+        fields= ("id", "name", "email", "address", "enrolments")
 
-    enrolments = RelatedList(Nested("EnrolmentSchema", exclude=("student")))
+    enrolments = RelatedList(Nested("EnrolmentSchema", only=("id", "enrolment_date", "course")))
 
 class TeacherSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -27,7 +29,6 @@ class TeacherSchema(SQLAlchemyAutoSchema):
         ordered = True
 
     courses = RelatedList(Nested("CourseSchema", exclude=("teacher","id")))
-    enrolments = RelatedList(Nested("EnrolmentSchema", exclude=("course")))
 
 
 class CourseSchema(SQLAlchemyAutoSchema):
@@ -37,7 +38,7 @@ class CourseSchema(SQLAlchemyAutoSchema):
         include_fk = True
         include_relationships = True
         ordered = True
-        fields = ("id","name","duration", "teacher")
+        fields = ("id","name","duration", "teacher", "enrolments")
           
 	# name = fields.String(required=True, validate=And(
 	# 	Length(min=2, error="Course names must be at least 2 characters long."),
@@ -47,6 +48,8 @@ class CourseSchema(SQLAlchemyAutoSchema):
 	# duration = fields.Float(allow_nan=False, required=False)
 	
     teacher = Nested("TeacherSchema", only=("id","name","department"))
+    enrolments = RelatedList(Nested("EnrolmentSchema", exclude=("course",)))
+
 	
 class EnrolmentSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -54,6 +57,8 @@ class EnrolmentSchema(SQLAlchemyAutoSchema):
         load_instance = True
         include_fk = True
         include_relationships = True
+        ordered=True
+        fields=("id", "enrolment_date", "student_id", "course_id", "student", "course")
     
     student = Nested("StudentSchema", only=("id", "name"))
     course = Nested("CourseSchema", only=("id", "name"))
