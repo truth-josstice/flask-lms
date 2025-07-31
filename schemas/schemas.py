@@ -1,7 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-
 from marshmallow_sqlalchemy.fields import Related, RelatedList, Nested
-from marshmallow import fields 
+from marshmallow import fields, ValidationError, validates
 
 from marshmallow.validate import Length, And, Regexp
 
@@ -47,6 +46,15 @@ class CourseSchema(SQLAlchemyAutoSchema):
 
         fields = ("id","name","duration", "teacher", "enrolments")
 	
+    ##validation functions
+    #@validates("property-to-validate")
+    #def some_function_name(self, property-to-validate, data_key)
+
+    @validates("name")
+    def validates_name(self, name, data_key):
+        if len(name) < 2:
+            print("Course name is too short!")
+            raise ValidationError("Course name is too short!")
 
     teacher = Nested("TeacherSchema", only=("id","name","department"))
     enrolments = RelatedList(Nested("EnrolmentSchema", exclude=("course",)))
