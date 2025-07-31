@@ -75,21 +75,21 @@ def delete_enrolment(enrolment_id):
     else:
         return {"message": f"Enrolment with id {enrolment_id} does not exist."}, 404
 
-# @enrolment_bp.route('/<int:enrolment_id>', methods = ["PUT", "PATCH"])
-# def update_enrolment(enrolment_id):
-#     stmt = db.select(Enrolment).where(Enrolment.id==enrolment_id)
-#     enrolment = db.session.scalar(stmt)
+@enrolment_bp.route('/<int:enrolment_id>', methods = ["PUT", "PATCH"])
+def update_enrolment(enrolment_id):
+    stmt = db.select(Enrolment).where(Enrolment.id==enrolment_id)
+    enrolment = db.session.scalar(stmt)
 
-#     if enrolment:
-#         body_data = request.get_json()
+    if enrolment:
+        body_data = request.get_json()
 
-#         enrolment.name = body_data.get("name", enrolment.name)
-#         enrolment.email = body_data.get("email", enrolment.email)
-#         enrolment.address = body_data.get("address", enrolment.address)
+        enrolment.enrolment_date = body_data.get("enrolment_date", enrolment.enrolment_date)
+        enrolment.student_id = body_data.get("student_id", enrolment.student_id)
+        enrolment.course_id = body_data.get("course_id", enrolment.course_id)
 
-#         db.session.commit()
+        db.session.commit()
 
-#         return jsonify(enrolment_schema.dump(enrolment))
+        return jsonify(enrolment_schema.dump(enrolment))
 
-#     else:
-#         return {"message": f"Enrolment with id {enrolment_id} does not exist."}, 404
+    else:
+        return {"message": f"Enrolment with id {enrolment_id} does not exist."}, 404

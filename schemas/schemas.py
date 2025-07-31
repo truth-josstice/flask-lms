@@ -59,7 +59,7 @@ class EnrolmentSchema(SQLAlchemyAutoSchema):
         include_fk = True
         include_relationships = True
         ordered=True
-        fields=("id", "enrolment_date", "student_id", "course_id", "student", "course")
+        fields=("id", "enrolment_date", "student", "course")
     
     student = Nested("StudentSchema", only=("id", "name"))
     course = Nested("CourseSchema", only=("id", "name"))
