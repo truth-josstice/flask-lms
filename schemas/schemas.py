@@ -1,20 +1,28 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from marshmallow import fields
-from marshmallow_sqlalchemy.fields import Related, RelatedList
+
+from marshmallow_sqlalchemy.fields import Related, RelatedList, Nested
+from marshmallow import fields 
+
 from marshmallow.validate import Length, And, Regexp
 
 
 from models.student import Student
 from models.teacher import Teacher
 from models.course import Course
-from models.enrollment import Enrollment
+
+from models.enrolment import Enrolment
+
 
 class StudentSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Student
         load_instance = True
-    
-    enrollments = RelatedList(Related(["id", "enrollment_date", "course_id"]))
+        include_relationships = True
+        ordered=True
+        fields= ("id", "name", "email", "address", "enrolments")
+
+    enrolments = RelatedList(Nested("EnrolmentSchema", only=("id", "enrolment_date", "course")))
+
 
 class TeacherSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -25,7 +33,8 @@ class TeacherSchema(SQLAlchemyAutoSchema):
         fields = ("id", "name", "department", "address", "courses")
         ordered = True
 
-    courses = RelatedList(Related(["name", "duration"]))
+    courses = RelatedList(Nested("CourseSchema", exclude=("teacher","id")))
+
 
 
 class CourseSchema(SQLAlchemyAutoSchema):
@@ -35,29 +44,27 @@ class CourseSchema(SQLAlchemyAutoSchema):
         include_fk = True
         include_relationships = True
         ordered = True
-        fields = ("id","name","duration", "teacher")
 
-    enrollments = RelatedList(Related(["id", "enrollment_date", "student_id"]))  
-	# name = fields.String(required=True, validate=And(
-	# 	Length(min=2, error="Course names must be at least 2 characters long."),
-	# 	Regexp("[A-Za-z][A-Za-z0-9 ]*$", error="Only letters, numbers, and spaces are allowed!")
-	# ))
-
-	# duration = fields.Float(allow_nan=False, required=False)
+        fields = ("id","name","duration", "teacher", "enrolments")
 	
-    teacher = Related(["id","name","department"])
 
+    teacher = Nested("TeacherSchema", only=("id","name","department"))
+    enrolments = RelatedList(Nested("EnrolmentSchema", exclude=("course",)))
 
-class EnrollmentSchema(SQLAlchemyAutoSchema):
+	
+class EnrolmentSchema(SQLAlchemyAutoSchema):
     class Meta:
-        model = Enrollment
+        model = Enrolment
         load_instance = True
+        include_fk = True
         include_relationships = True
-        include_FK = True
+        ordered=True
+        fields=("id", "enrolment_date", "student_id", "course_id", "student", "course")
+    
+    student = Nested("StudentSchema", only=("id", "name"))
+    course = Nested("CourseSchema", only=("id", "name"))
 
-    student = Related("id", "name")
-    courses = RelatedList(Related(["id", "name"]))
-
+    
 # Student Schema for converting a single entry
 student_schema = StudentSchema()
 
@@ -73,5 +80,6 @@ teachers_schema = TeacherSchema(many=True)
 course_schema = CourseSchema()
 courses_schema = CourseSchema(many=True)
 
-enrollment_schema = EnrollmentSchema()
-enrollments_schema = EnrollmentSchema(many=True)
+enrolment_schema = EnrolmentSchema()
+enrolments_schema = EnrolmentSchema(many=True)
+
