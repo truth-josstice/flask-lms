@@ -1,4 +1,5 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from marshmallow_sqlalchemy.fields import Related, RelatedList, Nested
 from marshmallow import fields 
 from marshmallow.validate import Length, And, Regexp
 
@@ -6,11 +7,15 @@ from marshmallow.validate import Length, And, Regexp
 from models.student import Student
 from models.teacher import Teacher
 from models.course import Course
+from models.enrolment import Enrolment
 
 class StudentSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Student
         load_instance = True
+        include_relationships = True
+
+    enrolments = RelatedList(Nested("EnrolmentSchema", exclude=("student")))
 
 class TeacherSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -21,7 +26,8 @@ class TeacherSchema(SQLAlchemyAutoSchema):
         fields = ("id", "name", "department", "address", "courses")
         ordered = True
 
-    courses = fields.List(fields.Nested("CourseSchema", exclude=("teacher","id",)))
+    courses = RelatedList(Nested("CourseSchema", exclude=("teacher","id")))
+    enrolments = RelatedList(Nested("EnrolmentSchema", exclude=("course")))
 
 
 class CourseSchema(SQLAlchemyAutoSchema):
@@ -40,8 +46,18 @@ class CourseSchema(SQLAlchemyAutoSchema):
 
 	# duration = fields.Float(allow_nan=False, required=False)
 	
-    teacher = fields.Nested("TeacherSchema", only=("id","name","department"))
+    teacher = Nested("TeacherSchema", only=("id","name","department"))
 	
+class EnrolmentSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Enrolment
+        load_instance = True
+        include_fk = True
+        include_relationships = True
+    
+    student = Nested("StudentSchema", only=("id", "name"))
+    course = Nested("CourseSchema", only=("id", "name"))
+
 
 # Student Schema for converting a single entry
 student_schema = StudentSchema()
@@ -57,3 +73,6 @@ teachers_schema = TeacherSchema(many=True)
 
 course_schema = CourseSchema()
 courses_schema = CourseSchema(many=True)
+
+enrolment_schema = EnrolmentSchema()
+enrolments_schema = EnrolmentSchema(many=True)
