@@ -1,8 +1,7 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow_sqlalchemy.fields import Related, RelatedList, Nested
 from marshmallow import fields, ValidationError, validates
-
-from marshmallow.validate import Length, And, Regexp
+from marshmallow.validate import Range, OneOf
 
 
 from models.student import Student
@@ -33,6 +32,10 @@ class TeacherSchema(SQLAlchemyAutoSchema):
         ordered = True
 
     courses = RelatedList(Nested("CourseSchema", exclude=("teacher","id")))
+    department = auto_field(validate=OneOf(
+        choices=["Management", "Science", "Engineering"],
+        error = "Only valid departments are: Management, Science or Engineering."
+        ))
 
 
 
@@ -45,8 +48,12 @@ class CourseSchema(SQLAlchemyAutoSchema):
         ordered = True
 
         fields = ("id","name","duration", "teacher", "enrolments")
-	
-    ##validation functions
+
+    duration = auto_field(validate=[
+        Range(min=1, error="Duration value must be at least 1.")
+    ])
+
+    #validation functions
     #@validates("property-to-validate")
     #def some_function_name(self, property-to-validate, data_key)
 
